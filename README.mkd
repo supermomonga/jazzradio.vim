@@ -24,3 +24,7 @@ endif
 ## Usage
 
 `:Unite goimport`
+
+## Licence
+
+MIT Licence
