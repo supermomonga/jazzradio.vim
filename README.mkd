@@ -9,7 +9,7 @@ I recommend to use `NeoBundle.vim` to install this plugin.
 
 
 ```vim
-NeoBundleLazy 'supermomonga/unite-goimport.vim', { 'depends' : [ 'Shougo/unite.vim', 'jnwhiteh/vim-golang' ] }
+NeoBundleLazy 'supermomonga/unite-goimport.vim', { 'depends' : [ 'Shougo/unite.vim', 'fatih/vim-go' ] }
 if neobundle#tap('unite-goimport.vim')
   call neobundle#config({
         \   'autoload' : {

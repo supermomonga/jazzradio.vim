@@ -24,7 +24,7 @@ function! s:source.action_table.import.func(candidate)
   if last_char == '/'
     execute 'Unite goimport -input=' . package
   else
-    execute 'Import ' . package
+    execute 'GoImport ' . package
   endif
 endfunction
 
