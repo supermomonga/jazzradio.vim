@@ -30,7 +30,7 @@ endfunction
 
 function! s:source.async_gather_candidates(args, context)
   let a:context.source.unite__cached_candidates = []
-  let list    = go#complete#Package(a:context.input,0,0)
+  let list    = go#package#Complete(a:context.input,0,0)
   return map(list, '{
         \   "word" : v:val,
         \   "action__package_name" : v:val,
