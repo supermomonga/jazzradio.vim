@@ -1,6 +1,6 @@
-## Unite-goimport
+## jazzradio.vim
 
-This makes importing go package easy with `Unite.vim`.
+All you need are Jazz and Vim.
 
 
 ## Install
@@ -9,12 +9,12 @@ I recommend to use `NeoBundle.vim` to install this plugin.
 
 
 ```vim
-NeoBundleLazy 'supermomonga/unite-goimport.vim', { 'depends' : [ 'Shougo/unite.vim', 'fatih/vim-go' ] }
+NeoBundleLazy 'supermomonga/jazzradio.vim', { 'depends' : [ 'Shougo/unite.vim' ] }
 if neobundle#tap('unite-goimport.vim')
   call neobundle#config({
         \   'autoload' : {
         \     'unite_sources' : [
-        \       'goimport'
+        \       'jazzradio'
         \     ]
         \   }
         \ })
@@ -23,7 +23,7 @@ endif
 
 ## Usage
 
-`:Unite goimport`
+`:Unite jazzradio`
 
 ## Licence
 
