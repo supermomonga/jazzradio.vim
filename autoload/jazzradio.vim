@@ -82,7 +82,7 @@ function! jazzradio#write_dummy_cache() " {{{
 endfunction
 " }}}
 
-" Variables {{{
-let g:jazzradio#cache_dir = get(g:, 'jazzradio#cache_dir', "~/.cache/jazzradio")
+" Variables
+let g:jazzradio#cache_dir = get(g:, 'jazzradio#cache_dir', expand("~/.cache/jazzradio"))
 let g:jazzradio#play_command = get(g:, 'jazzradio#play_command', "mplayer %%URL%%")
-" }}}
+
