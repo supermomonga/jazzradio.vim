@@ -17,7 +17,6 @@ function! jazzradio#play(id) " {{{
       let play_command = substitute(g:jazzradio#play_command, '%%URL%%', endpoint, '')
       call jazzradio#stop()
       call s:PM.touch('jazzradio_radio', play_command)
-      echo play_command
     else
       echo 'Error: vimproc is unavailable.'
     endif
