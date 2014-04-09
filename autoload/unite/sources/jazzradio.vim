@@ -22,13 +22,13 @@ function! s:source.action_table.play.func(candidate)
   call jazzradio#play(a:candidate.action__channel_id)
 endfunction
 
-function! s:source.async_gather_candidates(args, context)
-  let a:context.source.unite__cached_candidates = []
-  let list    = go#package#Complete(a:context.input,0,0)
-  return map(list, '{
-        \   "word" : v:val,
-        \   "action__channel_id" : v:val,
-        \ }')
+function! s:source.gather_candidates(args, context)
+  " let list = jazzradio#read_cache()
+  " return map(list, '{
+  "       \   "word" : v:val["name"] . " - " . v:val["desc"],
+  "       \   "action__channel_id" : v:val["id"],
+  "       \ }')
+  return []
 endfunction
 
 
