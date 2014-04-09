@@ -6,14 +6,55 @@ let s:CACHE = s:V.import('System.Cache')
 let s:JSON = s:V.import('Web.JSON')
 let s:HTML = s:V.import('Web.HTML')
 let s:HTTP = s:V.import('Web.HTTP')
+let s:PM = s:V.import('ProcessManager')
+
 
 " Player
-function! jazzradio#play(id)
-  echo a:id
-endfunction
+function! jazzradio#play(id) " {{{
+  if executable('mplayer')
+    if s:PM.is_available()
+      let endpoint = jazzradio#read_cache()[a:id]['endpoints'][0]
+      let play_command = substitute(g:jazzradio#play_command, '%%URL%%', endpoint, '')
+      call jazzradio#stop()
+      call s:PM.touch('jazzradio_radio', play_command)
+      echo play_command
+    else
+      echo 'Error: vimproc is unavailable.'
+    endif
+  else
+    echo 'Error: Please install mplayer to listen streaming radio.'
+  endif
+endfunction " }}}
+function! jazzradio#stop() " {{{
+  let status = 'dead'
+  try
+    let status = s:PM.status('jazzradio_radio')
+  catch
+  endtry
+  if status == 'inactive' || status == 'active'
+    return s:PM.kill('jazzradio_radio')
+  endif
+endfunction " }}}
+function! jazzradio#pause() " {{{
+  " TODO
+endfunction " }}}
+function! jazzradio#resume() " {{{
+  " TODO
+endfunction " }}}
+function! jazzradio#volume_up(level) " {{{
+  " TODO
+endfunction " }}}
+function! jazzradio#volume_down(level) " {{{
+  " TODO
+endfunction " }}}
+function! jazzradio#set_volume(level) " {{{
+  " TODO
+endfunction " }}}
+
 
 " Channel handling
 function! jazzradio#update_channels() " {{{
+  " TODO: It takes too long time. Make it async and unite UI.
   let channels = {}
   let dom = s:HTML.parseURL('http://www.jazzradio.com/')
   let list_doms = filter(dom.find('ul', {'id': 'channels'}).findAll('li'), "has_key(v:val['attr'], 'data-key')")
@@ -38,6 +79,10 @@ function! jazzradio#channel_id_list() " {{{
   let channels = jazzradio#read_cache()
   let list = keys(channels)
   return list
+endfunction " }}}
+function! jazzradio#channel_id_complete(a,l,p) " {{{
+  " TODO: filter
+  return jazzradio#channel_id_list()
 endfunction " }}}
 
 
@@ -84,5 +129,5 @@ endfunction
 
 " Variables
 let g:jazzradio#cache_dir = get(g:, 'jazzradio#cache_dir', expand("~/.cache/jazzradio"))
-let g:jazzradio#play_command = get(g:, 'jazzradio#play_command', "mplayer %%URL%%")
+let g:jazzradio#play_command = get(g:, 'jazzradio#play_command', "mplayer -slave -quiet %%URL%%")
 
