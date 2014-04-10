@@ -17,7 +17,7 @@ command! JazzradioStop call jazzradio#stop()
 
 augroup Jazzradio
   autocmd!
-  autocmd Jazzradio VimLeave call jazzradio#stop()
+  autocmd Jazzradio VimLeave * call jazzradio#stop()
 augroup END
 
 let &cpo = s:save_cpo
