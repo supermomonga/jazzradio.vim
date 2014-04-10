@@ -61,7 +61,7 @@ function! jazzradio#update_channels() " {{{
     let channel_id = list['attr']['data-key']
     let channel_name = list.find('strong').value()
     let channel_desc = substitute(list.find('span').value(), '^' . channel_name, '', '')
-    let endpoints = s:JSON.decode(s:HTTP.get('http://listen.jazzradio.com/webplayer/avantgarde.json').content)
+    let endpoints = s:JSON.decode(s:HTTP.get('http://listen.jazzradio.com/webplayer/' . channel_id .  '.json').content)
     let channels[channel_id] = {
           \   'id': channel_id,
           \   'name': channel_name,
