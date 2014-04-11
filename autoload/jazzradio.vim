@@ -10,19 +10,25 @@ let s:PM = s:V.import('ProcessManager')
 
 
 " Player
-function! jazzradio#play(id) " {{{
+function! jazzradio#play(key) " {{{
   if executable('mplayer')
     if s:PM.is_available()
-      let endpoint = jazzradio#read_cache()[a:id]['endpoints'][0]
-      let play_command = substitute(g:jazzradio#play_command, '%%URL%%', endpoint, '')
+      let channel = jazzradio#channel(a:key)
+      let playlist = channel['playlist']
+      let play_command = substitute(g:jazzradio#play_command, '%%URL%%', playlist, '')
       call jazzradio#stop()
       call s:PM.touch('jazzradio_radio', play_command)
+      echo 'Playing ' . channel['name'] . '.'
     else
       echo 'Error: vimproc is unavailable.'
     endif
   else
     echo 'Error: Please install mplayer to listen streaming radio.'
   endif
+endfunction " }}}
+function! jazzradio#channel(key) " {{{
+  let channels = jazzradio#channel_list()
+  return get(filter(channels, 'v:val["key"] == "' . a:key . '"'), 0)
 endfunction " }}}
 function! jazzradio#stop() " {{{
   let status = 'dead'
@@ -53,80 +59,60 @@ endfunction " }}}
 
 " Channel handling
 function! jazzradio#update_channels() " {{{
-  " TODO: It takes too long time. Make it async and unite UI.
-  let channels = {}
-  let dom = s:HTML.parseURL('http://www.jazzradio.com/')
-  let list_doms = filter(dom.find('ul', {'id': 'channels'}).findAll('li'), "has_key(v:val['attr'], 'data-key')")
-  for list in list_doms
-    let channel_id = list['attr']['data-key']
-    let channel_name = list.find('strong').value()
-    let channel_desc = substitute(list.find('span').value(), '^' . channel_name, '', '')
-    let endpoints = s:JSON.decode(s:HTTP.get('http://listen.jazzradio.com/webplayer/' . channel_id .  '.json').content)
-    let channels[channel_id] = {
-          \   'id': channel_id,
-          \   'name': channel_name,
-          \   'desc': channel_desc,
-          \   'endpoints': endpoints
-          \ }
-  endfor
+  let channels = s:JSON.decode(s:HTTP.get('http://listen.jazzradio.com/webplayer.json').content)
+  " echo type(s:JSON.decode(channels))
+  if jazzradio#has_cache(g:jazzradio#cache_previous_version)
+    call jazzradio#clear_cache(g:jazzradio#cache_previous_version)
+  endif
   return jazzradio#write_cache(channels)
 endfunction " }}}
 function! jazzradio#channel_list() " {{{
+  call jazzradio#update_cache_compatibility()
   return jazzradio#read_cache()
 endfunction " }}}
-function! jazzradio#channel_id_list() " {{{
-  let channels = jazzradio#read_cache()
-  let list = keys(channels)
-  return list
+function! jazzradio#channel_key_list() " {{{
+  return map(jazzradio#channel_list(), 'v:val["key"]')
 endfunction " }}}
-function! jazzradio#channel_id_complete(a,l,p) " {{{
+function! jazzradio#channel_key_complete(a,l,p) " {{{
   " TODO: filter
-  return jazzradio#channel_id_list()
+  return jazzradio#channel_key_list()
 endfunction " }}}
-
 
 " Cache handling
-function! jazzradio#clear_cache() " {{{
-  return s:CACHE.deletefile(g:jazzradio#cache_dir, 'channel_list.vson')
+function! jazzradio#cache_filename(...) " {{{
+  let cache_version = get(a:, 1, g:jazzradio#cache_version)
+  return 'channel_list_v' . cache_version . '.json'
 endfunction " }}}
-function! jazzradio#has_cache() " {{{
-  return jazzradio#read_cache() != {}
+function! jazzradio#clear_cache(...) " {{{
+  " TODO: depends on versions var is yokunai.
+  let cache_version = get(a:, 1, g:jazzradio#cache_version)
+  return s:CACHE.deletefile(g:jazzradio#cache_dir, jazzradio#cache_filename(cache_version))
 endfunction " }}}
-function! jazzradio#read_cache() " {{{
-  let lines = s:CACHE.readfile(g:jazzradio#cache_dir, 'channel_list.vson')
-  let data = s:JSON.decode(len(lines) == 0 ? '{}' : lines[0])
+function! jazzradio#has_cache(...) " {{{
+  let cache_version = get(a:, 1, g:jazzradio#cache_version)
+  return jazzradio#read_cache(cache_version) != []
+endfunction " }}}
+function! jazzradio#read_cache(...) " {{{
+  let cache_version = get(a:, 1, g:jazzradio#cache_version)
+  let lines = s:CACHE.readfile(g:jazzradio#cache_dir, jazzradio#cache_filename(cache_version))
+  let data = s:JSON.decode(len(lines) == 0 ? '[]' : lines[0])
   return data
-endfunction
-" }}}
-function! jazzradio#write_cache(data) " {{{
+endfunction " }}}
+function! jazzradio#write_cache(data, ...) " {{{
+  let cache_version = get(a:, 1, g:jazzradio#cache_version)
   let lines = [s:JSON.encode(a:data)]
-  return s:CACHE.writefile(g:jazzradio#cache_dir, 'channel_list.vson', lines)
+  return s:CACHE.writefile(g:jazzradio#cache_dir, jazzradio#cache_filename(cache_version), lines)
 endfunction
 " }}}
-function! jazzradio#write_dummy_cache() " {{{
-  let data = {
-        \   'avantgarde': {
-        \     'id': 'avantgarde',
-        \     'name': 'Avang-Garde',
-        \     'desc': 'Hi.',
-        \     'endpoints': [
-        \       'http://pub6.jazzradio.com:80/jr_avantgarde_aacplus.flv',
-        \       'http://pub1.jazzradio.com:80/jr_avantgarde_aacplus.flv',
-        \       'http://pub8.jazzradio.com:80/jr_avantgarde_aacplus.flv',
-        \       'http://pub4.jazzradio.com:80/jr_avantgarde_aacplus.flv',
-        \       'http://pub2.jazzradio.com:80/jr_avantgarde_aacplus.flv',
-        \       'http://pub5.jazzradio.com:80/jr_avantgarde_aacplus.flv',
-        \       'http://pub3.jazzradio.com:80/jr_avantgarde_aacplus.flv',
-        \       'http://pub7.jazzradio.com:80/jr_avantgarde_aacplus.flv'
-        \     ]
-        \   }
-        \ }
-  let lines = [s:JSON.encode(data)]
-  return s:CACHE.writefile(g:jazzradio#cache_dir, 'channel_list.vson', lines)
-endfunction
-" }}}
+function! jazzradio#update_cache_compatibility() " {{{
+  if !jazzradio#has_cache()
+    call jazzradio#update_channels()
+  end
+endfunction " }}}
 
 " Variables
+let g:jazzradio#cache_version = '1.0'
+let g:jazzradio#cache_previous_version = ''
 let g:jazzradio#cache_dir = get(g:, 'jazzradio#cache_dir', expand("~/.cache/jazzradio"))
-let g:jazzradio#play_command = get(g:, 'jazzradio#play_command', "mplayer -slave -quiet %%URL%%")
+let g:jazzradio#play_command = get(g:, 'jazzradio#play_command', "mplayer -slave -really-quiet -playlist %%URL%%")
 

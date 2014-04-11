@@ -23,11 +23,10 @@ function! s:source.action_table.play.func(candidate)
 endfunction
 
 function! s:source.gather_candidates(args, context)
-  " let a:context.source.unite__cached_candidates = []
-  let list = jazzradio#read_cache()
-  return map(keys(list), '{
-        \   "word" : list[v:val]["name"] . " - " . list[v:val]["desc"],
-        \   "action__channel_id" : list[v:val]["id"],
+  let channels = jazzradio#channel_list()
+  return map(channels, '{
+        \   "word" : v:val["name"] . " - " . v:val["description"],
+        \   "action__channel_id" : v:val["key"],
         \ }')
 endfunction
 
