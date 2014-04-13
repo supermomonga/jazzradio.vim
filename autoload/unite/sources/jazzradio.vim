@@ -24,8 +24,12 @@ endfunction
 
 function! s:source.gather_candidates(args, context)
   let channels = jazzradio#channel_list()
+  let max_name_len = max(map(copy(channels), 'len(v:val["name"])'))
+  let label = jazzradio#current_channel() == '' ? '' : g:jazzradio#playing_label
+  let label_len = len(label) > 0 ? len(label) + 1 : 0
+  let format = '%-' . label_len . 's%-' . max_name_len . 's - %s'
   return map(channels, '{
-        \   "word" : v:val["name"] . " - " . v:val["description"],
+        \   "word" : printf(format, jazzradio#current_channel() == v:val["key"] ? label : "" , v:val["name"], v:val["description"]),
         \   "action__channel_id" : v:val["key"],
         \ }')
 endfunction

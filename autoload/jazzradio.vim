@@ -19,6 +19,7 @@ function! jazzradio#play(key) " {{{
       call jazzradio#stop()
       call s:PM.touch('jazzradio_radio', play_command)
       echo 'Playing ' . channel['name'] . '.'
+      let g:jazzradio#current_channel = channel['key']
     else
       echo 'Error: vimproc is unavailable.'
     endif
@@ -30,13 +31,29 @@ function! jazzradio#channel(key) " {{{
   let channels = jazzradio#channel_list()
   return get(filter(channels, 'v:val["key"] == "' . a:key . '"'), 0)
 endfunction " }}}
-function! jazzradio#stop() " {{{
+function! jazzradio#is_playing(...) " {{{
+  " Process status
   let status = 'dead'
   try
     let status = s:PM.status('jazzradio_radio')
   catch
   endtry
+
   if status == 'inactive' || status == 'active'
+    return 1
+  else
+    return 0
+  endif
+endfunction " }}}
+function! jazzradio#current_channel() " {{{
+  if jazzradio#is_playing()
+    return get(g:, 'jazzradio#current_channel', '')
+  else
+    return ''
+  endif
+endfunction " }}}
+function! jazzradio#stop() " {{{
+  if jazzradio#is_playing()
     return s:PM.kill('jazzradio_radio')
   endif
 endfunction " }}}
@@ -115,4 +132,5 @@ let g:jazzradio#cache_version = '1.0'
 let g:jazzradio#cache_previous_version = ''
 let g:jazzradio#cache_dir = get(g:, 'jazzradio#cache_dir', expand("~/.cache/jazzradio"))
 let g:jazzradio#play_command = get(g:, 'jazzradio#play_command', "mplayer -slave -really-quiet -playlist %%URL%%")
+let g:jazzradio#playing_label = get(g:, 'jazzradio#playing_label', '>')
 
