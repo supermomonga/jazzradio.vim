@@ -132,5 +132,12 @@ let g:jazzradio#cache_version = '1.0'
 let g:jazzradio#cache_previous_version = ''
 let g:jazzradio#cache_dir = get(g:, 'jazzradio#cache_dir', expand("~/.cache/jazzradio"))
 let g:jazzradio#play_command = get(g:, 'jazzradio#play_command', "mplayer -slave -really-quiet -playlist %%URL%%")
-let g:jazzradio#playing_label = get(g:, 'jazzradio#playing_label', '>')
+let g:jazzradio#playing_label_frames = get(g:, 'jazzradio#playing_label_frames', [
+      \   '   O   ',
+      \   '  (O)  ',
+      \   ' ((O)) ',
+      \   '(((O)))',
+      \   '(( O ))',
+      \   '(  O  )',
+      \ ])
 
