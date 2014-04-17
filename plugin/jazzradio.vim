@@ -12,7 +12,7 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 command! JazzradioUpdateChannels call jazzradio#update_channels()
-command! -nargs=1 -complete=customlist,jazzradio#channel_id_complete JazzradioPlay call jazzradio#play(<f-args>)
+command! -nargs=1 -complete=customlist,jazzradio#channel_key_complete JazzradioPlay call jazzradio#play(<f-args>)
 command! JazzradioStop call jazzradio#stop()
 
 augroup Jazzradio
