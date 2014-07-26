@@ -78,7 +78,7 @@ endfunction " }}}
 " Channel handling
 function! jazzradio#update_channels() " {{{
   let data = s:JSON.decode(s:HTTP.request('get', 'http://ephemeron:dayeiph0ne%40pp@api.audioaddict.com/v1/jazzradio/mobile/batch_update?stream_set_key=', { "client": [ "curl", "wget" ] }).content)
-  let raw_channels = s:L.flatten(map(data.channel_filters, 'v:val.channels'), 1)
+  let raw_channels = s:L.uniq_by(s:L.flatten(map(data.channel_filters, 'v:val.channels'), 1), 'v:val.key')
   let channels = map(raw_channels, '{
         \ "id": v:val.id,
         \ "key": v:val.key,
