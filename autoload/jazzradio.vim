@@ -6,6 +6,7 @@ let s:CACHE = s:V.import('System.Cache')
 let s:JSON = s:V.import('Web.JSON')
 let s:HTML = s:V.import('Web.HTML')
 let s:HTTP = s:V.import('Web.HTTP')
+let s:L = s:V.import('Data.List')
 let s:PM = s:V.import('ProcessManager')
 
 
@@ -76,8 +77,15 @@ endfunction " }}}
 
 " Channel handling
 function! jazzradio#update_channels() " {{{
-  let channels = s:JSON.decode(s:HTTP.get('http://listen.jazzradio.com/webplayer.json').content)
-  " echo type(s:JSON.decode(channels))
+  let data = s:JSON.decode(s:HTTP.request('get', 'http://ephemeron:dayeiph0ne%40pp@api.audioaddict.com/v1/jazzradio/mobile/batch_update?stream_set_key=', { "client": [ "curl", "wget" ] }).content)
+  let raw_channels = s:L.flatten(map(data.channel_filters, 'v:val.channels'), 1)
+  let channels = map(raw_channels, '{
+        \ "id": v:val.id,
+        \ "key": v:val.key,
+        \ "playlist": "http://listen.jazzradio.com/webplayer/" . v:val.key . ".pls",
+        \ "name": v:val.name,
+        \ "description": v:val.description,
+        \ }')
   if jazzradio#has_cache(g:jazzradio#cache_previous_version)
     call jazzradio#clear_cache(g:jazzradio#cache_previous_version)
   endif
