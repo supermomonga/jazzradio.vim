@@ -4,7 +4,7 @@ You know, all we need are Jazz and Vim.
 
 ## Dependencies
 
-You need to install some Vim plugins, but `NeoBundle` make it painless. I reccomend it to manage plugins.
+You need to install some Vim plugins, but `NeoBundle` makes it painless. I recommend it to manage plugins.
 You also need to install `mplayer` command.
 
 
